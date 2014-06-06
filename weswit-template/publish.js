@@ -334,6 +334,37 @@ exports.publish = function(taffyData, opts, tutorials) {
 
     // set up tutorials for helper
     helper.setTutorials(tutorials);
+    
+    //create summary if missing
+    var methods = find({kind: 'function'});
+    
+    methods.forEach(function(m) {
+      if (!m.summary && m.description) {
+        var d = m.description;
+        m.summary = d.indexOf(".") > -1 ? d.substring(0,d.indexOf(".")+1) : d;
+      }
+      
+      if (!m.inherited) {
+        m.inherited = false;
+      }
+      
+      if (m.reimplemented !== true && m.reimplemented !== false) {
+        var others = find({kind: 'function', longname: m.longname, inherited: true, memberof: m.memberof});
+        var f = 0;
+        others.forEach(function(o) {
+          f++;
+          if (!m.inherited) {
+            m.inherits = o.inherits;
+            o.reimplemented = true;
+          } else if (f>1) {
+            o.reimplemented = true;
+          } else {
+            o.reimplemented = false;
+          }
+        });
+      }
+
+    });
 
     data = helper.prune(data);
     data.sort('longname, version, since');

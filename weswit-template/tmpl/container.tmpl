@@ -22,6 +22,8 @@
     <?js if (doc.classdesc) { ?>
         <div class="class-description"><?js= doc.classdesc ?></div>
     <?js } ?>
+    
+    <?js= self.partial('details.tmpl', doc) ?>
 </header>  
 
 <article>
@@ -36,8 +38,6 @@
         <?js if (doc.description) { ?>
             <div class="description"><?js= doc.description ?></div>
         <?js } ?>
-        
-        <?js= self.partial('details.tmpl', doc) ?>
         
         <?js if (doc.examples && doc.examples.length) { ?>
             <h3>Example<?js= doc.examples.length > 1? 's':'' ?></h3>
@@ -106,12 +106,31 @@
     <?js } ?>
     
     <?js
-        var methods = self.find({kind: 'function', memberof: title === 'Global' ? {isUndefined: true} : doc.longname});
+        var methods = self.find({kind: 'function', memberof: title === 'Global' ? {isUndefined: true} : doc.longname, inherited: false});
         if (methods && methods.length && methods.forEach) { 
     ?>
-        <h3 class="subsection-title">Methods</h3>
+        <h3 class="subsection-title">Method Summary</h3>
         
         <dl><?js methods.forEach(function(m) { ?>
+          <?js= self.partial('method_summary.tmpl', m) ?>
+        <?js }); ?></dl>
+    <?js } ?>
+    
+    <?js
+        var iMethods = self.find({kind: 'function', memberof: title === 'Globals'? {isUndefined: true} : doc.longname, inherited: true});
+        if (iMethods && iMethods.length && iMethods.forEach) { 
+    ?>
+        <h3 class="subsection-title">Inherited Methods</h3>
+        <?js iMethods.forEach(function(m) { ?>
+            <?js= self.partial('method_inherited.tmpl', m) ?>
+        <?js }); ?>
+   
+      <?js } ?>
+      
+    <?js if (methods && methods.length && methods.forEach) { ?>
+        <h3 class="subsection-title">Method Detail</h3>
+          
+        <dl><?js methods.forEach(function(m) { ?>    
             <?js= self.partial('method.tmpl', m) ?>
         <?js }); ?></dl>
     <?js } ?>
