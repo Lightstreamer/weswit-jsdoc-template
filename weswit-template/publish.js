@@ -319,6 +319,7 @@ exports.publish = function(taffyData, opts, tutorials) {
 
     var conf = env.conf.templates || {};
     conf['default'] = conf['default'] || {};
+    conf['weswit'] = conf['weswit'] || {};
 
     var templatePath = opts.template;
     view = new template.Template(templatePath + '/tmpl');
@@ -528,6 +529,8 @@ exports.publish = function(taffyData, opts, tutorials) {
     if (!conf['default'] || conf['default'].outputSourceFiles === true) {
         generateSourceFiles(sourceFiles, opts.encoding, conf["weswit"]);
     }
+    
+    
 
     if (members.globals.length) { generate('Global', [{kind: 'globalobj'}], globalUrl, conf["weswit"]); }
     
@@ -537,10 +540,16 @@ exports.publish = function(taffyData, opts, tutorials) {
         
      
     var libName = conf["weswit"] && conf["weswit"].extendedLibraryName ? conf["weswit"].extendedLibraryName : "Index";
-
+    var summaryText = conf["weswit"].summaryFile ? fs.readFileSync( conf["weswit"].summaryFile, 'utf8' ) : (!opts.readme ? "Javascript Documentation" : null);
+        
     generate(libName,
         packages.concat(
-            [{kind: 'mainpage', readme: opts.readme, longname: (opts.mainpagetitle) ? opts.mainpagetitle : 'Main Page'}]
+            [{
+              kind: 'mainpage', 
+              readme: opts.readme, 
+              longname: (opts.mainpagetitle) ? opts.mainpagetitle : 'Main Page',
+              summary:summaryText
+            }]
         ).concat(files),
     indexUrl, conf["weswit"]);
 

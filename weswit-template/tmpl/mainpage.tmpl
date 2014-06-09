@@ -9,6 +9,12 @@ var self = this;
 
 <?js if (data.readme) { ?>
     <section>
-        <article><?js= data.readme ?></article>
+        <article class="class-description"><?js= data.readme ?></article>
+    </section>
+<?js } ?>
+
+<?js if (data.summary) { ?>
+    <section>
+        <article class="class-description"><?js= data.summary ?></article>
     </section>
 <?js } ?>
