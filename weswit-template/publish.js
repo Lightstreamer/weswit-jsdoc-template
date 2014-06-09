@@ -134,6 +134,22 @@ function generate(title, docs, filename, conf, resolveLinks) {
     fs.writeFileSync(outpath, html, 'utf8');
 }
 
+function generateIndex(title, docs, filename, conf, names) {
+    var docData = {
+        title: title,
+        footerText: conf.footerText || "",
+        docs: docs,
+        names: names
+    };
+    
+    var outpath = path.join(outdir, filename),
+        html = view.render('index.tmpl', docData);
+    
+    html = helper.resolveLinks(html); // turn {@link foo} into <a href="foodoc.html">foo</a>
+    
+    fs.writeFileSync(outpath, html, 'utf8');
+}
+
 function generateSourceFiles(sourceFiles, encoding, conf) {
     encoding = encoding || 'utf8';
     Object.keys(sourceFiles).forEach(function(file) {
@@ -198,7 +214,9 @@ function attachModuleSymbols(doclets, modules) {
  * @return {string} The HTML for the navigation sidebar.
  */
 function buildNav(members) {
-    var nav = '<h2><a href="index.html">Index</a></h2>',
+  //var nav = '<a href="http://www.lightstreamer.com"><img src="logo.png"/></a><h2><a href="index.html">Home</a> | <a href="index-all.html">Index</a></h2>',
+
+    var nav = '<h2><a href="index.html">Home</a> | <a href="index-all.html">Index</a></h2>',
         seen = {},
         hasClassList = false,
         classNav = '',
@@ -327,6 +345,8 @@ exports.publish = function(taffyData, opts, tutorials) {
     // claim some special filenames in advance, so the All-Powerful Overseer of Filename Uniqueness
     // doesn't try to hand them out later
     var indexUrl = helper.getUniqueFilename('index');
+    var indexAllUrl = helper.getUniqueFilename('index-all');
+    
     // don't call registerLink() on this one! 'index' is also a valid longname
 
     var globalUrl = helper.getUniqueFilename('global');
@@ -476,7 +496,40 @@ exports.publish = function(taffyData, opts, tutorials) {
         }
     });
     
+    var namesForIndex = [];
+    
     data().each(function(doclet) {
+        
+        //prepare alphabetic index (currently handles methods classes and modules TODO complete)
+        //TODO might we use doclet.kind?
+        var longname = doclet.longname
+        if (longname.indexOf("~") > -1) { 
+          //hide private stuff
+        } else if (longname.indexOf("#") > -1) {
+          //instance methods
+          var shortName = longname.substring(longname.indexOf("#")+1);
+          shortName = shortName.replace('"','',"g");
+          var cName = longname.substring(0,longname.indexOf("#"));
+          namesForIndex.push({name: shortName, definition: "Instance method in " + cName, longname: longname}); 
+             
+        } else if (longname.indexOf(".") > -1) {     
+          //static methods
+          var shortName = longname.substring(longname.indexOf(".")+1);
+          shortName = shortName.replace('"','',"g");
+          var cName = longname.substring(0,longname.indexOf("."));
+          namesForIndex.push({name: shortName, definition: "Static method in " + cName, longname: longname}); 
+        
+        } else if (longname.indexOf(":") > -1) {     
+          //modules
+          var shortName = longname.substring(longname.indexOf(":")+1);
+          shortName = shortName.replace('"','',"g");
+          namesForIndex.push({name: shortName, definition: "Module " + longname, longname: longname});
+        } else {
+          //classes
+          var shortName = longname.replace('"','',"g");
+          namesForIndex.push({name: shortName, definition: "Class " + longname, longname: longname});
+        }
+    
         var url = helper.longnameToUrl[doclet.longname];
 
         if (url.indexOf('#') > -1) {
@@ -492,6 +545,21 @@ exports.publish = function(taffyData, opts, tutorials) {
             addAttribs(doclet);
         }
     });
+    
+    namesForIndex = namesForIndex.sort(function(a,b) {
+      return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
+    });
+    var byLetterIndex = [];//would be easier with a {}
+    var curr = null;
+    namesForIndex.forEach(function(el) {
+      var l = el.name[0].toUpperCase();
+      if (l != curr) {
+        byLetterIndex.push([]);
+        curr = l;
+      }
+      byLetterIndex[byLetterIndex.length-1].push(el);
+    });
+    
     
     // do this after the urls have all been generated
     data().each(function(doclet) {
@@ -552,6 +620,14 @@ exports.publish = function(taffyData, opts, tutorials) {
             }]
         ).concat(files),
     indexUrl, conf["weswit"]);
+    
+    generateIndex("Index",
+      packages.concat(
+        [{
+          kind: 'index', 
+          longname: 'Index Page', 
+        }]).concat(files),
+    indexAllUrl, conf["weswit"],  byLetterIndex);
 
     // set up the lists that we'll use to generate pages
     var classes = taffy(members.classes);
