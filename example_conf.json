@@ -1,0 +1,27 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/)_"
+    },
+    "plugins": [],
+    "jsVersion": 180,
+    
+    "templates": {
+      "weswit": {
+        "extendedLibraryName": "My Lib",
+        "summaryFile": "path/to/summary/file",
+        "footerText": "my footer text",
+        "logo": {
+          "img": "path/to/logo/file",
+          "link": "http://www.mysite.com"
+        }
+      },
+      
+      "default": {
+        "outputSourceFiles": false
+      }
+    }
+}
