@@ -213,10 +213,37 @@ function attachModuleSymbols(doclets, modules) {
  * @param {array<object>} members.events
  * @return {string} The HTML for the navigation sidebar.
  */
-function buildNav(members) {
+function buildNav(members,logo) {
   //var nav = '<a href="http://www.lightstreamer.com"><img src="logo.png"/></a><h2><a href="index.html">Home</a> | <a href="index-all.html">Index</a></h2>',
 
-    var nav = '<h2><a href="index.html">Home</a> | <a href="index-all.html">Index</a></h2>',
+    var logoStr = "";
+    if (logo && logo.img) {
+      if(logo.link) {
+        logoStr += '<a href="'+logo.link+'">';
+      }
+      logoStr += '<img src="logo.png"/>';
+      if(logo.link) {
+        logoStr += '</a>';
+      }
+      
+      //TODO copy logo on deploy folder
+      
+      
+      var outpath = path.join(outdir, "logo.png");
+      
+      if (fs.copyFileSync) {
+        fs.copyFileSync(logo.img,outpath);
+      } else if(fs.createReadStream) {
+      //TODO not tested
+        var inStr = fs.createReadStream(logo.img);
+        var outStr = fs.createWriteStream(outpath);
+        inStr.pipe(outStr);
+      } //else what?
+      
+    }
+  
+  
+    var nav = logoStr+'<h2><a href="index.html">Home</a> | <a href="index-all.html">Index</a></h2>',
         seen = {},
         hasClassList = false,
         classNav = '',
@@ -588,7 +615,7 @@ exports.publish = function(taffyData, opts, tutorials) {
     view.htmlsafe = htmlsafe;
 
     // once for all
-    view.nav = buildNav(members);
+    view.nav = buildNav(members,conf["weswit"].logo);
     attachModuleSymbols( find({ kind: ['class', 'function'], longname: {left: 'module:'} }),
         members.modules );
 
