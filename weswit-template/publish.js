@@ -367,6 +367,12 @@ exports.publish = function(taffyData, opts, tutorials) {
       }
 
     });
+    
+    var stuffWithSource = find({kind:  ['class', 'module', 'global']});
+    stuffWithSource.forEach(function(m) {
+      m.printSourceLink = conf['default'] && conf['default'].outputSourceFiles === true;
+    });
+    
 
     data = helper.prune(data);
     data.sort('longname, version, since');
@@ -517,9 +523,9 @@ exports.publish = function(taffyData, opts, tutorials) {
     attachModuleSymbols( find({ kind: ['class', 'function'], longname: {left: 'module:'} }),
         members.modules );
 
-    // output pretty-printed source files by default; do this before generating any other pages, so
+    // do not output pretty-printed source files by default; do this before generating any other pages, so
     // that the other pages can link to the source files
-    if (!conf['default'] || conf['default'].outputSourceFiles !== false) {
+    if (!conf['default'] || conf['default'].outputSourceFiles === true) {
         generateSourceFiles(sourceFiles, opts.encoding, conf["weswit"]);
     }
 
