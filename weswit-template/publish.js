@@ -114,11 +114,13 @@ function getPathFromDoclet(doclet) {
     return filepath;
 }
     
-function generate(title, docs, filename, resolveLinks) {
+function generate(title, docs, filename, conf, resolveLinks) {
     resolveLinks = resolveLinks === false ? false : true;
+    conf = conf || {};
 
     var docData = {
         title: title,
+        footerText: conf.footerText || "",
         docs: docs
     };
     
@@ -132,7 +134,7 @@ function generate(title, docs, filename, resolveLinks) {
     fs.writeFileSync(outpath, html, 'utf8');
 }
 
-function generateSourceFiles(sourceFiles, encoding) {
+function generateSourceFiles(sourceFiles, encoding, conf) {
     encoding = encoding || 'utf8';
     Object.keys(sourceFiles).forEach(function(file) {
         var source;
@@ -151,7 +153,7 @@ function generateSourceFiles(sourceFiles, encoding) {
         }
 
         generate('Source: ' + sourceFiles[file].shortened, [source], sourceOutfile,
-            false);
+            conf, false);
     });
 }
 
@@ -518,20 +520,23 @@ exports.publish = function(taffyData, opts, tutorials) {
     // output pretty-printed source files by default; do this before generating any other pages, so
     // that the other pages can link to the source files
     if (!conf['default'] || conf['default'].outputSourceFiles !== false) {
-        generateSourceFiles(sourceFiles, opts.encoding);
+        generateSourceFiles(sourceFiles, opts.encoding, conf["weswit"]);
     }
 
-    if (members.globals.length) { generate('Global', [{kind: 'globalobj'}], globalUrl); }
+    if (members.globals.length) { generate('Global', [{kind: 'globalobj'}], globalUrl, conf["weswit"]); }
     
     // index page displays information from package.json and lists files
     var files = find({kind: 'file'}),
         packages = find({kind: 'package'});
+        
+     
+    var libName = conf["weswit"] && conf["weswit"].extendedLibraryName ? conf["weswit"].extendedLibraryName : "Index";
 
-    generate('Index',
+    generate(libName,
         packages.concat(
             [{kind: 'mainpage', readme: opts.readme, longname: (opts.mainpagetitle) ? opts.mainpagetitle : 'Main Page'}]
         ).concat(files),
-    indexUrl);
+    indexUrl, conf["weswit"]);
 
     // set up the lists that we'll use to generate pages
     var classes = taffy(members.classes);
@@ -543,27 +548,27 @@ exports.publish = function(taffyData, opts, tutorials) {
     Object.keys(helper.longnameToUrl).forEach(function(longname) {
         var myClasses = helper.find(classes, {longname: longname});
         if (myClasses.length) {
-            generate('Class: ' + myClasses[0].name, myClasses, helper.longnameToUrl[longname]);
+            generate('Class: ' + myClasses[0].name, myClasses, helper.longnameToUrl[longname], conf["weswit"]);
         }
         
         var myModules = helper.find(modules, {longname: longname});
         if (myModules.length) {
-            generate('Module: ' + myModules[0].name, myModules, helper.longnameToUrl[longname]);
+            generate('Module: ' + myModules[0].name, myModules, helper.longnameToUrl[longname], conf["weswit"]);
         }
 
         var myNamespaces = helper.find(namespaces, {longname: longname});
         if (myNamespaces.length) {
-            generate('Namespace: ' + myNamespaces[0].name, myNamespaces, helper.longnameToUrl[longname]);
+            generate('Namespace: ' + myNamespaces[0].name, myNamespaces, helper.longnameToUrl[longname], conf["weswit"]);
         }
         
         var myMixins = helper.find(mixins, {longname: longname});
         if (myMixins.length) {
-            generate('Mixin: ' + myMixins[0].name, myMixins, helper.longnameToUrl[longname]);
+            generate('Mixin: ' + myMixins[0].name, myMixins, helper.longnameToUrl[longname], conf["weswit"]);
         }
 
         var myExternals = helper.find(externals, {longname: longname});
         if (myExternals.length) {
-            generate('External: ' + myExternals[0].name, myExternals, helper.longnameToUrl[longname]);
+            generate('External: ' + myExternals[0].name, myExternals, helper.longnameToUrl[longname], conf["weswit"]);
         }
     });
 
