@@ -150,6 +150,24 @@ function generateIndex(title, docs, filename, conf, names) {
     fs.writeFileSync(outpath, html, 'utf8');
 }
 
+
+function generateExterns(data) {
+    var outputText = "";
+    data.forEach(function(el) {
+        el.forEach(function(member) {
+          if (member.name == "undefined" || member.memberof == "undefined") {
+            //skip
+          } else {
+            //instance methods
+            outputText+=member.extern+"\n";
+          }
+        });
+    });
+  
+    var outpath = path.join(outdir, "externs.js");
+    fs.writeFileSync(outpath, outputText, 'utf8');
+}
+
 function generateSourceFiles(sourceFiles, encoding, conf) {
     encoding = encoding || 'utf8';
     Object.keys(sourceFiles).forEach(function(file) {
@@ -385,6 +403,8 @@ exports.publish = function(taffyData, opts, tutorials) {
     // set up tutorials for helper
     helper.setTutorials(tutorials);
     
+    var externs = {};
+    
     //create summary if missing
     var methods = find({kind: 'function'});
     
@@ -413,7 +433,7 @@ exports.publish = function(taffyData, opts, tutorials) {
           }
         });
       }
-
+      
     });
     
     var stuffWithSource = find({kind:  ['class', 'module', 'global']});
@@ -536,25 +556,58 @@ exports.publish = function(taffyData, opts, tutorials) {
           //instance methods
           var shortName = longname.substring(longname.indexOf("#")+1);
           shortName = shortName.replace('"','',"g");
+          
           var cName = longname.substring(0,longname.indexOf("#"));
-          namesForIndex.push({name: shortName, definition: "Instance method in " + cName, longname: longname}); 
+          cName = cName.substring(cName.indexOf(":")+1);
+          if (cName == "undefined") {
+            cName = "Globals";
+          }
+          
+          namesForIndex.push({name: shortName, 
+            definition: "Instance method in " + cName, 
+            extern: cName+".prototype."+shortName+" = function() {};",
+            longname: longname, 
+            memberof: cName}); 
              
         } else if (longname.indexOf(".") > -1) {     
           //static methods
           var shortName = longname.substring(longname.indexOf(".")+1);
           shortName = shortName.replace('"','',"g");
+          
           var cName = longname.substring(0,longname.indexOf("."));
-          namesForIndex.push({name: shortName, definition: "Static method in " + cName, longname: longname}); 
+          cName = cName.substring(cName.indexOf(":")+1);
+          if (cName == "undefined") {
+            cName = "Globals";
+          }
+          
+          namesForIndex.push({name: shortName, 
+            definition: "Static method in " + cName, 
+            extern: cName+"."+shortName+" = function() {};",
+            longname: longname, 
+            memberof: cName}); 
         
         } else if (longname.indexOf(":") > -1) {     
+        
+          //name undefined means globals
+        
           //modules
           var shortName = longname.substring(longname.indexOf(":")+1);
           shortName = shortName.replace('"','',"g");
-          namesForIndex.push({name: shortName, definition: "Module " + longname, longname: longname});
+          if (shortName == "undefined") {
+            shortName="Globals";
+          }
+          
+          namesForIndex.push({name: shortName, 
+            definition: "Module " + shortName, 
+            extern: shortName+" = {};",
+            longname: longname});
         } else {
           //classes
           var shortName = longname.replace('"','',"g");
-          namesForIndex.push({name: shortName, definition: "Class " + longname, longname: longname});
+          namesForIndex.push({name: shortName, 
+            extern: shortName+" = function() {};",
+            definition: "Class " + longname, 
+            longname: longname});
         }
     
         var url = helper.longnameToUrl[doclet.longname];
@@ -577,6 +630,7 @@ exports.publish = function(taffyData, opts, tutorials) {
       return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
     });
     var byLetterIndex = [];//would be easier with a {}
+    
     var curr = null;
     namesForIndex.forEach(function(el) {
       var l = el.name[0].toUpperCase();
@@ -585,6 +639,29 @@ exports.publish = function(taffyData, opts, tutorials) {
         curr = l;
       }
       byLetterIndex[byLetterIndex.length-1].push(el);
+    });
+    
+    
+    
+    namesForIndex = namesForIndex.sort(function(a,b) {
+      if (!a.memberof) {
+        return -1;
+      } else if (!b.memberof) {
+        return 1;
+      }
+      return a.memberof < b.memberof ? -1 : 1;
+    });
+    
+    var externsIndex = [];
+    externsIndex.push([]);
+    curr = null;
+    namesForIndex.forEach(function(el) {
+      var l = el.memberof;
+      if (l != curr) {
+        externsIndex.push([]);
+        curr = l;
+      }
+      externsIndex[externsIndex.length-1].push(el);
     });
     
     
@@ -655,6 +732,8 @@ exports.publish = function(taffyData, opts, tutorials) {
           longname: 'Index Page', 
         }]).concat(files),
     indexAllUrl, conf["weswit"],  byLetterIndex);
+    
+    generateExterns(externsIndex);
 
     // set up the lists that we'll use to generate pages
     var classes = taffy(members.classes);

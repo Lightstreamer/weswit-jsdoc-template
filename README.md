@@ -10,6 +10,7 @@ This templates adds:
 * The possibility to import an html snippet as summary page
 * The possibility to configure the title of the the index page
 * Removes sources references when sources are not part of the output
+* [experimental] An externs.js file to be used with the Google Closure compiler
 
 We use this template to generate the documentation of our JavaScript library. You can see a live example: [Lightstreamer JavaScript client API](http://www.lightstreamer.com/docs/client_javascript_uni_api/index.html)
 
