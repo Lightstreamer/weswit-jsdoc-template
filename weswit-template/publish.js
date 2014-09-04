@@ -627,7 +627,12 @@ exports.publish = function(taffyData, opts, tutorials) {
     });
     
     namesForIndex = namesForIndex.sort(function(a,b) {
-      return a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1;
+      var al = a.name.toLowerCase();
+      var bl = b.name.toLowerCase();
+      if (al == bl) {
+        return 0;
+      }
+      return al < bl ? -1 : 1;
     });
     var byLetterIndex = [];//would be easier with a {}
     
@@ -644,7 +649,12 @@ exports.publish = function(taffyData, opts, tutorials) {
     
     
     namesForIndex = namesForIndex.sort(function(a,b) {
-      if (!a.memberof) {
+      if (a.memberof == b.memberof) {
+        return 0;
+      } else if (!a.memberof) {
+        if (!b.memberof) {
+          return 0;
+        }
         return -1;
       } else if (!b.memberof) {
         return 1;
