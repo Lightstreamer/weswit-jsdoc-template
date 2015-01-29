@@ -404,7 +404,39 @@ exports.publish = function(taffyData, opts, tutorials) {
     helper.setTutorials(tutorials);
     
     var externs = {};
-    
+
+
+         function searchDescription(className,methodName) {
+
+            var _class = find({longname:className});
+            for (var c=0; c<_class.length; c++) {
+                if (_class[c].augments) {
+                    for (var a = 0; a < _class[c].augments.length; a++) {
+
+                        var _superMethod = find({longname: _class[c].augments[a] + "#" + methodName});
+                        for (var s = 0; s < _superMethod.length; s++) {
+                            if (_superMethod[s].inherits) {
+                                return _superMethod[s].inherits;
+                            } else if (_superMethod[s].description) {
+                                return _superMethod[s].longname;
+                            }
+                        }
+
+
+                        var inherits = searchDescription(_class[c].augments[a], methodName);
+                        if (inherits) {
+                            return inherits;
+                        }
+
+                    }
+                }
+            }
+
+            return null;
+        }
+
+
+
     //create summary if missing
     var methods = find({kind: 'function'});
     
@@ -432,6 +464,13 @@ exports.publish = function(taffyData, opts, tutorials) {
             o.reimplemented = false;
           }
         });
+
+        if (!m.description && !m.inherits) {
+            m.inherits = searchDescription(m.memberof, m.name);
+            if (m.inherits) {
+                m.inherited = true;
+            }
+        }
       }
       
     });
