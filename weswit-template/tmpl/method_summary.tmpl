@@ -5,7 +5,7 @@ var self = this;
 
 <?js if (!data.inherited) { ?>
   <dt>
-    <?js= self.linkto(data.longname,id) ?>
+    <span class="signature"><?js= self.linkto(data.longname,id) ?><span class="signature">
   </dt>
   <?js if (data.summary) { ?>
       <dd class="summary"><?js= summary ?></dd>

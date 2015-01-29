@@ -314,3 +314,7 @@ img {
   font-family: Consolas, 'Lucida Console', Monaco, monospace;
   font-size: 80%;
 }
+
+.inherited_list {
+  padding: 14px 0;
+}
