@@ -271,7 +271,7 @@ function buildNav(members,logo) {
         nav += '<h3>Modules</h3><ul>';
         members.modules.forEach(function(m) {
             if ( !hasOwnProp.call(seen, m.longname) ) {
-                nav += '<li>'+linkto(m.longname, m.name)+'</li>';
+                nav += '<li class="signature">'+linkto(m.longname, m.name)+'</li>';
             }
             seen[m.longname] = true;
         });
@@ -283,7 +283,7 @@ function buildNav(members,logo) {
         nav += '<h3>Externals</h3><ul>';
         members.externals.forEach(function(e) {
             if ( !hasOwnProp.call(seen, e.longname) ) {
-                nav += '<li>'+linkto( e.longname, e.name.replace(/(^"|"$)/g, '') )+'</li>';
+                nav += '<li class="signature">'+linkto( e.longname, e.name.replace(/(^"|"$)/g, '') )+'</li>';
             }
             seen[e.longname] = true;
         });
@@ -294,7 +294,7 @@ function buildNav(members,logo) {
     if (members.classes.length) {
         members.classes.forEach(function(c) {
             if ( !hasOwnProp.call(seen, c.longname) ) {
-                classNav += '<li>'+linkto(c.longname, c.name)+'</li>';
+                classNav += '<li class="signature">'+linkto(c.longname, c.name)+'</li>';
             }
             seen[c.longname] = true;
         });
@@ -310,7 +310,7 @@ function buildNav(members,logo) {
         nav += '<h3>Events</h3><ul>';
         members.events.forEach(function(e) {
             if ( !hasOwnProp.call(seen, e.longname) ) {
-                nav += '<li>'+linkto(e.longname, e.name)+'</li>';
+                nav += '<li class="signature">'+linkto(e.longname, e.name)+'</li>';
             }
             seen[e.longname] = true;
         });
@@ -322,7 +322,7 @@ function buildNav(members,logo) {
         nav += '<h3>Namespaces</h3><ul>';
         members.namespaces.forEach(function(n) {
             if ( !hasOwnProp.call(seen, n.longname) ) {
-                nav += '<li>'+linkto(n.longname, n.name)+'</li>';
+                nav += '<li class="signature">'+linkto(n.longname, n.name)+'</li>';
             }
             seen[n.longname] = true;
         });
@@ -334,7 +334,7 @@ function buildNav(members,logo) {
         nav += '<h3>Mixins</h3><ul>';
         members.mixins.forEach(function(m) {
             if ( !hasOwnProp.call(seen, m.longname) ) {
-                nav += '<li>'+linkto(m.longname, m.name)+'</li>';
+                nav += '<li class="signature">'+linkto(m.longname, m.name)+'</li>';
             }
             seen[m.longname] = true;
         });
@@ -354,7 +354,7 @@ function buildNav(members,logo) {
     if (members.globals.length) {
         members.globals.forEach(function(g) {
             if ( g.kind !== 'typedef' && !hasOwnProp.call(seen, g.longname) ) {
-                globalNav += '<li>' + linkto(g.longname, g.name) + '</li>';
+                globalNav += '<li class="signature">' + linkto(g.longname, g.name) + '</li>';
             }
             seen[g.longname] = true;
         });
