@@ -12,7 +12,6 @@ This templates adds:
 * Removes sources references when sources are not part of the output
 * [experimental] An externs.js file to be used with the Google Closure compiler
 
-We used this template to generate the documentation of our JavaScript library up to version 6.x. You can see a live example: [Lightstreamer JavaScript client API](http://www.lightstreamer.com/latest/Lightstreamer_Allegro-Presto-Vivace_6_0/Lightstreamer/DOCS-SDKs/sdk_client_javascript/doc/API-reference/index.html)
-
+We used this template to generate the documentation of our JavaScript library up to version 6.x. You can see a live example: [Lightstreamer JavaScript client API](https://lightstreamer.com/api/ls-web-client/7.0.3/index.html)
 ## Usage
 Just drop the weswit-template folder under the templates folder of jsdoc and configure jsdoc to use it. Optionally you can extend your jsdoc.json conf as shown in the example_conf.json file included in this project
